@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whiteboard - Real-time Collaboration</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Whiteboard - Real-time Collaboration</h1>
+  <p class="instructions">Start drawing on one canvas and see it mirrored on the other canvas in real-time!</p>
+  <div class="whiteboard-container">
+    <canvas class="whiteboard" id="whiteboard1" width="400" height="300"></canvas>
+    <canvas class="whiteboard" id="whiteboard2" width="400" height="300"></canvas>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+  <script>
+    const socket = io('http://localhost:3000/');
+    const canvas1 = document.getElementById('whiteboard1');
+    const canvas2 = document.getElementById('whiteboard2');
+    const ctx1 = canvas1.getContext('2d');
+    const ctx2 = canvas2.getContext('2d');
+
+    let drawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    canvas1.addEventListener('mousedown', startDrawing);
+    canvas1.addEventListener('mousemove', draw);
+    canvas1.addEventListener('mouseup', stopDrawing);
+    canvas1.addEventListener('mouseout', stopDrawing);
+
+    canvas2.addEventListener('mousedown', startDrawing);
+    canvas2.addEventListener('mousemove', draw);
+    canvas2.addEventListener('mouseup', stopDrawing);
+    canvas2.addEventListener('mouseout', stopDrawing);
+
+    function startDrawing(e) {
+      drawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      const [x, y] = [e.offsetX, e.offsetY];
+
+      // Draw line from last position to current position on canvas1
+      ctx1.beginPath();
+      ctx1.moveTo(lastX, lastY);
+      ctx1.lineTo(x, y);
+      ctx1.stroke();
+
+      // Emit drawing data to server
+      socket.emit('draw', { lastX, lastY, x, y });
+
+      // Draw the same line on canvas2
+      ctx2.beginPath();
+      ctx2.moveTo(lastX, lastY);
+      ctx2.lineTo(x, y);
+      ctx2.stroke();
+
+      // Update last position
+      [lastX, lastY] = [x, y];
+    }
+
+    function stopDrawing() {
+      drawing = false;
+    }
+
+    socket.on('draw', ({ lastX, lastY, x, y }) => {
+      // Draw received line on canvas1
+      ctx1.beginPath();
+      ctx1.moveTo(lastX, lastY);
+      ctx1.lineTo(x, y);
+      ctx1.stroke();
+
+      // Draw received line on canvas2
+      ctx2.beginPath();
+      ctx2.moveTo(lastX, lastY);
+      ctx2.lineTo(x, y);
+      ctx2.stroke();
+    });
+  </script>
+</body>
+</html>
