@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphQL Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    label {
+      font-weight: bold;
+    }
+    select, button {
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      cursor: pointer;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <label for="queryType">Select Query Type:</label>
+    <select id="queryType">
+      <option value="hello">Hello</option>
+      <option value="users">Get All Users</option>
+      <option value="user">Get User by ID</option>
+    </select>
+    <div id="userInput" style="display: none;">
+      <label for="userId">Enter User ID:</label>
+      <input type="text" id="userId">
+    </div>
+    <button onclick="fetchData()">Fetch Data</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+   function fetchData() {
+  const queryType = document.getElementById('queryType').value;
+  let query = `{ ${queryType}`;
+  
+  if (queryType === 'user') {
+    const userId = document.getElementById('userId').value.trim();
+    if (!userId) {
+      document.getElementById('result').innerText = 'Please enter a valid User ID.';
+      return;
+    }
+    query += `(id: "${userId}") }`; // Close the bracket for user query
+  } else {
+    query += ` }`; // Close the bracket for other queries
+  }
+  
+  fetch('/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ query }),
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+    document.getElementById('result').innerText = 'Error fetching data. Please try again.';
+  });
+}
+
+    // Show/hide user input field based on query type selection
+    document.getElementById('queryType').addEventListener('change', function() {
+      const userInput = document.getElementById('userInput');
+      if (this.value === 'user') {
+        userInput.style.display = 'block';
+      } else {
+        userInput.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
