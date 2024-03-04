@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+service ChatService {
+  rpc JoinStream(stream ChatMessage) returns (stream ChatMessage);
+}
+
+message ChatMessage {
+  string sender = 1;
+  string message = 2;
+}
