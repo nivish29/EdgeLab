@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-time Drawing Game</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+  }
+
+  #main-canvas {
+    border: 2px solid black;
+    width: 500px;
+    height: 500px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  #game-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<h1 id="game-title">Real-time Drawing Game</h1>
+<canvas id="main-canvas" width="500" height="500"></canvas>
+<script>
+  const mainCanvas = document.getElementById('main-canvas');
+  const mainContext = mainCanvas.getContext('2d');
+
+  let isDrawing = false;
+  let lastX, lastY;
+
+  // WebSocket setup
+  const ws = new WebSocket("ws://localhost:8080");
+
+  // Event listeners for drawing
+  mainCanvas.addEventListener('mousedown', startDrawing);
+  mainCanvas.addEventListener('mousemove', draw);
+  mainCanvas.addEventListener('mouseup', stopDrawing);
+
+  // Handle drawing start
+  function startDrawing(event) {
+    isDrawing = true;
+    [lastX, lastY] = [event.offsetX, event.offsetY];
+  }
+
+  // Handle drawing
+  function draw(event) {
+    if (!isDrawing) return;
+
+    const x = event.offsetX;
+    const y = event.offsetY;
+
+    // Draw locally
+    mainContext.lineWidth = 5;
+    mainContext.lineCap = 'round';
+    mainContext.strokeStyle = 'black';
+    mainContext.beginPath();
+    mainContext.moveTo(lastX, lastY);
+    mainContext.lineTo(x, y);
+    mainContext.stroke();
+
+    // Send drawing coordinates to the server
+    ws.send(JSON.stringify({ type: 'draw', prevX: lastX, prevY: lastY, x, y }));
+
+    [lastX, lastY] = [x, y];
+  }
+
+  // Handle drawing stop
+  function stopDrawing() {
+    isDrawing = false;
+  }
+
+  mainCanvas.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+  });
+</script>
+</body>
+</html>
