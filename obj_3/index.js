@@ -56,7 +56,7 @@ app.post('/graphql', graphqlHTTP({
 }));
 
 // Start the server
-const PORT = process.env.PORT || 5500;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`GraphQL server is running on http://localhost:${PORT}/graphql`);
 });
