@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Tracking and Analytics</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  #container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: calc(100% - 40px); /* Subtracting the total horizontal padding */
+    max-width: 500px;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  h2 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  button, input {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  button:hover {
+    background-color: #555;
+    color: #fff;
+  }
+  input {
+    width: calc(100% - 20px); /* Subtracting the total horizontal padding */
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px 15px;
+    transition: border-color 0.3s;
+  }
+  input:focus {
+    border-color: #555;
+  }
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <h1>Event Tracking and Analytics</h1>
+  <input type="text" id="inputField" placeholder="Enter something...">
+  <div class="button-group">
+    <button id="button1">Button 1</button>
+    <button id="button2">Button 2</button>
+    <button id="button3">Button 3</button>
+    <button id="button4">Button 4</button>
+  </div>
+  <div id="right-container">
+    <h2>Event Tracking Log</h2>
+    <ul id="eventLog"></ul>
+  </div>
+</div>
+
+<script>
+  // Variables to store the click counts for each button
+  let button1ClickCount = 0;
+  let button2ClickCount = 0;
+  let button3ClickCount = 0;
+  let button4ClickCount = 0;
+
+  // Function to send webhook request
+  function sendWebhookRequest(event, data) {
+    const webhookUrl = 'http://localhost:3000/webhook';
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ event: event, data: data })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to send webhook request');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  }
+
+  // Function to update event log in UI
+  function updateEventLog(eventText) {
+    const eventLog = document.getElementById('eventLog');
+    const listItem = document.createElement('li');
+    listItem.textContent = eventText;
+    eventLog.appendChild(listItem);
+  }
+
+  // Event listeners for buttons
+  document.getElementById('button1').addEventListener('click', function() {
+    const input = document.getElementById('inputField').value;
+    const event = 'Button 1 Clicked';
+    const eventText = event + ' - Input: ' + input + ' - Click count: ' + (++button1ClickCount);
+    const data = { input: input };
+    sendWebhookRequest(event, data);
+    updateEventLog(eventText);
+  });
+
+  document.getElementById('button2').addEventListener('click', function() {
+    const input = document.getElementById('inputField').value;
+    const event = 'Button 2 Clicked';
+    const eventText = event + ' - Input: ' + input + ' - Click count: ' + (++button2ClickCount);
+    const data = { input: input };
+    sendWebhookRequest(event, data);
+    updateEventLog(eventText);
+  });
+
+  document.getElementById('button3').addEventListener('click', function() {
+    const input = document.getElementById('inputField').value;
+    const event = 'Button 3 Clicked';
+    const eventText = event + ' - Input: ' + input + ' - Click count: ' + (++button3ClickCount);
+    const data = { input: input };
+    sendWebhookRequest(event, data);
+    updateEventLog(eventText);
+  });
+
+  document.getElementById('button4').addEventListener('click', function() {
+    const input = document.getElementById('inputField').value;
+    const event = 'Button 4 Clicked';
+    const eventText = event + ' - Input: ' + input + ' - Click count: ' + (++button4ClickCount);
+    const data = { input: input };
+    sendWebhookRequest(event, data);
+    updateEventLog(eventText);
+  });
+</script>
+</body>
+</html>
